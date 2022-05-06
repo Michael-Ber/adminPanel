@@ -92,8 +92,6 @@ export default class EditorMeta extends Component {
     }
 
     render() {
-
-        console.log(this.props.target);
         const {modal, target} = this.props;
         const {title, keywords, description} = this.state.meta;
         return (
