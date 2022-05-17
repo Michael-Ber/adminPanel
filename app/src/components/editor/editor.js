@@ -10,6 +10,7 @@ import ChooseModal from "../choose-modal";
 import Panel from "../panel";
 import EditorMeta from "../editor-meta";
 import EditorImages from "../editor-images";
+import Login from "../login";
 
 export default class Editor extends Component {
     constructor() {
@@ -19,28 +20,62 @@ export default class Editor extends Component {
             pageList: [],
             backupsList: [],
             newPageName: "",
-            loading: true
+            loading: true,
+            auth: false
         };
         this.isLoading = this.isLoading.bind(this);
         this.isLoaded = this.isLoaded.bind(this);
         this.save = this.save.bind(this);
         this.init = this.init.bind(this);
+        this.login = this.login.bind(this);
         this.restoreBackup = this.restoreBackup.bind(this);
     }
     
     componentDidMount() {
-        this.init(null, this.currentPage)
+        this.checkAuth();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if(this.state.auth !== prevState.auth) {
+            this.init(null, this.currentPage);
+        }
+    }
+
+    checkAuth() {
+        axios
+            .get("./api/checkAuth.php")
+            .then(res => {
+                console.log(res.data);
+                this.setState({
+                    auth: res.data.auth
+                })
+            })
+    }
+
+    login(passw) {
+        if(passw.length > 5) {
+            axios
+                .post("./api/login.php", {"password": passw})
+                .then(res => {
+                    this.setState({
+                        auth: res.data.auth
+                    })
+                })
+        }
     }
     
     init(e, page) {
         if(e) {
             e.preventDefault();
         }
-        this.isLoading();
-        this.iframe = document.querySelector('iframe');
-        this.open(page, this.isLoaded);
-        this.loadPageList();
-        this.loadBackupsList();
+
+        if(this.state.auth) {
+            this.isLoading();
+            this.iframe = document.querySelector('iframe');
+            this.open(page, this.isLoaded);
+            this.loadPageList();
+            this.loadBackupsList();
+        }
     } 
 
 
@@ -164,12 +199,14 @@ export default class Editor extends Component {
 
 
     render() {
-        const {loading, pageList, backupsList} = this.state;
+        const {loading, pageList, backupsList, auth} = this.state;
         const modal = true;
         let spinner;
 
         loading ? spinner = <Spinner active/> : spinner = <Spinner />
-
+        if(!auth) {
+            return <Login login={this.login}/>
+        }
 
         return (
             <>
