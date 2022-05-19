@@ -17,7 +17,12 @@ export default class Login extends Component {
 
     render() {
         const {passw} = this.state;
-        const {login} = this.props;
+        const {login, lengthErr, logErr} = this.props;
+
+        let renderLogError, renderLengthError;
+
+        logErr ? renderLogError = <span className="login-error">Введен неправильный пароль!</span>: null;
+        lengthErr ? renderLengthError = <span className="login-error">Пароль должен быть длиннее 5 символов</span>: null;
 
         return (
             <div className="login-container">
@@ -32,6 +37,8 @@ export default class Login extends Component {
                         placeholder="Пароль" 
                         value={passw}
                         onChange={(e) => this.onPasswordChange(e)}/>
+                    {renderLogError}
+                    {renderLengthError}
                     <button 
                         className="uk-button uk-button-primary uk-margin-top" 
                         type="button"
